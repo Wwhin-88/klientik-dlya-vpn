@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hiddify/core/app_info/app_info_provider.dart';
-import 'package:hiddify/core/model/environment.dart';
-import 'package:hiddify/core/model/region.dart';
-import 'package:hiddify/core/preferences/actions_at_closing.dart';
+import 'package:vpnchik/core/app_info/app_info_provider.dart';
+import 'package:vpnchik/core/model/environment.dart';
+import 'package:vpnchik/core/model/region.dart';
+import 'package:vpnchik/core/preferences/actions_at_closing.dart';
 
-import 'package:hiddify/core/preferences/preferences_provider.dart';
-import 'package:hiddify/core/utils/preferences_utils.dart';
-import 'package:hiddify/features/per_app_proxy/model/per_app_proxy_mode.dart';
-import 'package:hiddify/features/window/notifier/window_notifier.dart';
-import 'package:hiddify/utils/platform_utils.dart';
+import 'package:vpnchik/core/preferences/preferences_provider.dart';
+import 'package:vpnchik/core/utils/preferences_utils.dart';
+import 'package:vpnchik/features/per_app_proxy/model/per_app_proxy_mode.dart';
+import 'package:vpnchik/features/window/notifier/window_notifier.dart';
+import 'package:vpnchik/utils/platform_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'general_preferences.g.dart';
@@ -116,6 +116,12 @@ abstract class Preferences {
   static final psiphonConsentGiven = PreferencesNotifier.create<bool, bool>("psiphon-consent-given", false);
 
   static final showRouteGeneralOptions = PreferencesNotifier.create<bool, bool>("show-route-general-options", true);
+
+  /// Whether the hardcoded VLESS profile has already been created on first launch.
+  static final hardcodedProfileCreated = PreferencesNotifier.create<bool, bool>(
+    "hardcoded_profile_created",
+    false,
+  );
 }
 
 @Riverpod(keepAlive: true)

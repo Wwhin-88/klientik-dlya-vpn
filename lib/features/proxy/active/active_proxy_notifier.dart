@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:hiddify/core/haptic/haptic_service.dart';
-import 'package:hiddify/core/preferences/general_preferences.dart';
-import 'package:hiddify/core/utils/throttler.dart';
-import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
-import 'package:hiddify/features/proxy/data/proxy_data_providers.dart';
-import 'package:hiddify/features/proxy/data/proxy_repository.dart';
-import 'package:hiddify/features/proxy/model/ip_info_entity.dart' as oldipinfo;
-import 'package:hiddify/features/proxy/model/proxy_failure.dart';
-import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
+import 'package:vpnchik/core/haptic/haptic_service.dart';
+import 'package:vpnchik/core/preferences/general_preferences.dart';
+import 'package:vpnchik/core/utils/throttler.dart';
+import 'package:vpnchik/features/connection/notifier/connection_notifier.dart';
+import 'package:vpnchik/features/proxy/data/proxy_data_providers.dart';
+import 'package:vpnchik/features/proxy/data/proxy_repository.dart';
+import 'package:vpnchik/features/proxy/model/ip_info_entity.dart' as oldipinfo;
+import 'package:vpnchik/features/proxy/model/proxy_failure.dart';
+import 'package:vpnchik/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 
-import 'package:hiddify/utils/riverpod_utils.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/utils/riverpod_utils.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'active_proxy_notifier.g.dart';

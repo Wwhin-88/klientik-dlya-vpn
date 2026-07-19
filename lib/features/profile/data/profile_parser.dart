@@ -4,14 +4,14 @@ import 'dart:io';
 import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:hiddify/core/db/db.dart';
-import 'package:hiddify/core/http_client/dio_http_client.dart';
-import 'package:hiddify/features/profile/data/profile_data_mapper.dart';
-import 'package:hiddify/features/profile/model/profile_entity.dart';
-import 'package:hiddify/features/profile/model/profile_failure.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
-import 'package:hiddify/singbox/model/singbox_proxy_type.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/db/db.dart';
+import 'package:vpnchik/core/http_client/dio_http_client.dart';
+import 'package:vpnchik/features/profile/data/profile_data_mapper.dart';
+import 'package:vpnchik/features/profile/model/profile_entity.dart';
+import 'package:vpnchik/features/profile/model/profile_failure.dart';
+import 'package:vpnchik/features/settings/data/config_option_repository.dart';
+import 'package:vpnchik/singbox/model/singbox_proxy_type.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meta/meta.dart';
 
@@ -161,7 +161,7 @@ class ProfileParser {
           tempFilePath,
           cancelToken: cancelToken,
           userAgent: _ref.read(ConfigOptions.useXrayCoreWhenPossible)
-              ? _httpClient.userAgent.replaceAll("HiddifyNext", "HiddifyNextX")
+              ? _httpClient.userAgent.replaceAll("vpnchik", "vpnchikX")
               : null,
         )
         .catchError((err) {
@@ -219,7 +219,7 @@ class ProfileParser {
             tmpPath,
             cancelToken: cancelToken,
             userAgent: ref.read(ConfigOptions.useXrayCoreWhenPossible)
-                ? httpClient.userAgent.replaceAll('HiddifyNext', 'HiddifyNextX')
+                ? httpClient.userAgent.replaceAll('vpnchik', 'vpnchikX')
                 : null,
           );
 

@@ -2,11 +2,11 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
-import 'package:hiddify/features/profile/model/profile_entity.dart';
-import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/core/router/dialog/dialog_notifier.dart';
+import 'package:vpnchik/features/profile/model/profile_entity.dart';
+import 'package:vpnchik/features/profile/notifier/profile_notifier.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,11 +17,6 @@ class ProfileTileMain extends HookConsumerWidget {
   final bool isMain;
   static const verifiedDomains = [
     'hiddify.com',
-    // 't.me',
-    // 'telegram.me',
-    // 'instagram.com',
-    // 'x.com',
-    // 'facebook.com',
   ];
   static const verifiedLinks = [
     'https://t.me/hiddify',
@@ -39,7 +34,6 @@ class ProfileTileMain extends HookConsumerWidget {
       return;
     }
 
-    // Show warning dialog for unknown domains
     final shouldLaunch = await ref.read(dialogNotifierProvider.notifier).showUnknownDomainsWarning(url: url);
     if (shouldLaunch == true) {
       await launchUrl(uri);
@@ -60,109 +54,127 @@ class ProfileTileMain extends HookConsumerWidget {
 
     return Material(
       color: Colors.transparent,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: InkWell(
-              onTap: () => ref
-                  .read(updateProfileNotifierProvider(profile.id).notifier)
-                  .updateProfile(profile as RemoteProfileEntity),
-              borderRadius: BorderRadius.circular(12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFAF5).withOpacity(0.85),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFF8BBD0).withOpacity(0.15)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFF8BBD0).withOpacity(0.12),
+              blurRadius: 16,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: InkWell(
+                onTap: () => ref
+                    .read(updateProfileNotifierProvider(profile.id).notifier)
+                    .updateProfile(profile as RemoteProfileEntity),
+                borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFFF8BBD0).withOpacity(0.3),
+                            const Color(0xFFFFD1B3).withOpacity(0.3),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: FaIcon(
+                        FontAwesomeIcons.arrowsRotate,
+                        color: const Color(0xFF3D2C2E).withOpacity(0.6),
+                        size: 18,
+                      ),
                     ),
-                    child: Icon(FluentIcons.arrow_sync_24_filled, color: theme.colorScheme.primary, size: 20),
-                  ),
-                  const Gap(6),
-                  Text(
-                    profile.name,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    const Gap(8),
+                    Text(
+                      profile.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF3D2C2E),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (subInfo != null)
-            Container(
-              width: 350,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IntrinsicHeight(
-                    // Add this to ensure equal height
-                    child: Row(
-                      children: [
-                        if (subInfo.total > 0) _BandwithUsageRow(subInfo),
-
-                        // if (subInfo.total > 0 && subInfo.remaining.inDays > 0)
-                        //   const VerticalDivider(
-                        //     // Add divider between items
-                        //     width: 1,
-                        //     thickness: 1,
-                        //     indent: 12,
-                        //     endIndent: 12,
-                        //   ),
-                        if (subInfo.remaining.inDays > 0)
-                          // Add Expanded
-                          _UsageRow(
-                            icon: null, //FluentIcons.timer_24_regular,
-                            title: subInfo.remaining.inDays > 365
-                                ? "∞ days remaining"
-                                : "${subInfo.remaining.inDays}/30 days remaining",
-                            progress: subInfo.remaining.inDays > 365 ? 0 : subInfo.remaining.inDays / 30,
-                            color: _getProgressColor(1 - (subInfo.remaining.inDays / 30)),
-                          ),
-                      ],
-                    ),
-                  ),
-                  if ((subInfo.webPageUrl != null || subInfo.supportUrl != null))
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            if (subInfo != null)
+              Container(
+                width: 350,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IntrinsicHeight(
                       child: Row(
                         children: [
-                          if (subInfo.webPageUrl != null)
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => _launchUrlWithCheck(context, ref, subInfo.webPageUrl!),
-                                borderRadius: BorderRadius.circular(8),
-                                child: _InfoItem(
-                                  icon: _getLinkIcon(subInfo.webPageUrl!, FluentIcons.building_shop_24_regular),
-                                  label: t.components.subscriptionInfo.profileSite,
-                                  value: _formatSupportLink(subInfo.webPageUrl!),
-                                ),
-                              ),
+                          if (subInfo.total > 0) _BandwithUsageRow(subInfo, theme),
+                          if (subInfo.remaining.inDays > 0)
+                            _UsageRow(
+                              icon: null,
+                              title: subInfo.remaining.inDays > 365
+                                  ? "∞ days remaining"
+                                  : "${subInfo.remaining.inDays}/30 days remaining",
+                              progress: subInfo.remaining.inDays > 365 ? 0 : subInfo.remaining.inDays / 30,
+                              color: _getProgressColor(1 - (subInfo.remaining.inDays / 30)),
+                              theme: theme,
                             ),
-                          if (subInfo.supportUrl != null) ...[
-                            const Gap(12),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => _launchUrlWithCheck(context, ref, subInfo.supportUrl!),
-                                borderRadius: BorderRadius.circular(8),
-                                child: _InfoItem(
-                                  icon: _getLinkIcon(subInfo.supportUrl!, FontAwesomeIcons.headset),
-                                  label: t.components.subscriptionInfo.profileSupport,
-                                  value: _formatSupportLink(subInfo.supportUrl!),
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ),
-                ],
+                    if ((subInfo.webPageUrl != null || subInfo.supportUrl != null))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            if (subInfo.webPageUrl != null)
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => _launchUrlWithCheck(context, ref, subInfo.webPageUrl!),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: _InfoItem(
+                                    icon: _getLinkIcon(subInfo.webPageUrl!, FluentIcons.building_shop_24_regular),
+                                    label: t.components.subscriptionInfo.profileSite,
+                                    value: _formatSupportLink(subInfo.webPageUrl!),
+                                  ),
+                                ),
+                              ),
+                            if (subInfo.supportUrl != null) ...[
+                              const Gap(12),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => _launchUrlWithCheck(context, ref, subInfo.supportUrl!),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: _InfoItem(
+                                    icon: _getLinkIcon(subInfo.supportUrl!, FontAwesomeIcons.headset.data),
+                                    label: t.components.subscriptionInfo.profileSupport,
+                                    value: _formatSupportLink(subInfo.supportUrl!),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -172,19 +184,18 @@ class ProfileTileMain extends HookConsumerWidget {
     final host = uri.host.toLowerCase();
 
     if (host.endsWith('telegram.me') || host.endsWith('t.me')) {
-      return FontAwesomeIcons.telegram;
+      return FontAwesomeIcons.telegram.data;
     }
     if (host.endsWith('instagram.com')) {
-      return FontAwesomeIcons.instagram;
+      return FontAwesomeIcons.instagram.data;
     }
     if (host.endsWith('twitter.com')) {
-      return FontAwesomeIcons.xTwitter;
+      return FontAwesomeIcons.xTwitter.data;
     }
     if (host.endsWith('facebook.com')) {
-      return FontAwesomeIcons.facebook;
+      return FontAwesomeIcons.facebook.data;
     }
     if (host.endsWith('hiddify.com')) {
-      // return IconData();
     }
     return icon ?? FluentIcons.link_24_regular;
   }
@@ -206,36 +217,36 @@ class ProfileTileMain extends HookConsumerWidget {
       return uri.pathSegments.lastWhere((e) => e.isNotEmpty, orElse: () => '');
     }
     if (host.endsWith('hiddify.com')) {
-      return "Hiddify";
+      return "vpnchik";
     }
     return uri.host;
   }
 
   Color _getProgressColor(double ratio) {
-    if (ratio < 0.25) return Colors.red;
-    if (ratio < 0.45) return Colors.orange;
-    return Colors.green;
+    if (ratio < 0.25) return const Color(0xFFE8A0BF); // pastel rose
+    if (ratio < 0.45) return const Color(0xFFFFD1B3); // pastel peach
+    return const Color(0xFFA8D5BA); // pastel mint green
   }
 
-  Widget _BandwithUsageRow(SubscriptionInfo subInfo) {
+  Widget _BandwithUsageRow(SubscriptionInfo subInfo, ThemeData theme) {
     return _UsageRow(
       icon: FluentIcons.data_usage_24_filled,
       title: subInfo.total.isInfinitSize() ? "∞ GB remaining" : "${subInfo.remainingBWratio * 100}% remaining",
       progress: subInfo.total.isInfinitSize() ? 1 : subInfo.remainingBWratio,
       color: _getProgressColor(subInfo.remainingBWratio),
+      theme: theme,
     );
   }
 }
 
-// Rest of the widget classes remain the same...
-
 class _UsageRow extends StatelessWidget {
-  const _UsageRow({required this.icon, required this.title, required this.progress, required this.color});
+  const _UsageRow({required this.icon, required this.title, required this.progress, required this.color, required this.theme});
 
   final IconData? icon;
   final String title;
   final double progress;
   final Color color;
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
@@ -249,15 +260,17 @@ class _UsageRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.bodyMedium),
-                  const Gap(4),
+                  Text(title, style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF3D2C2E).withOpacity(0.7),
+                  )),
+                  const Gap(6),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
                     child: LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                      backgroundColor: const Color(0xFFF8BBD0).withOpacity(0.15),
                       valueColor: AlwaysStoppedAnimation<Color>(color),
-                      minHeight: 4,
+                      minHeight: 6,
                     ),
                   ),
                 ],
@@ -283,13 +296,13 @@ class _InfoItem extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(12),
-      // decoration: BoxDecoration(
-      //   color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-      //   borderRadius: BorderRadius.circular(12),
-      // ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF0F3).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+          Icon(icon, size: 20, color: const Color(0xFFD1C4E9)),
           const Gap(12),
           Expanded(
             child: Column(
@@ -298,10 +311,17 @@ class _InfoItem extends StatelessWidget {
                 Text(
                   label,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                    color: const Color(0xFF3D2C2E).withOpacity(0.5),
                   ),
                 ),
-                Text(value, style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF3D2C2E).withOpacity(0.8),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),

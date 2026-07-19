@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:hiddify/core/analytics/analytics_filter.dart';
-import 'package:hiddify/core/analytics/analytics_logger.dart';
+import 'package:vpnchik/core/analytics/analytics_filter.dart';
+import 'package:vpnchik/core/analytics/analytics_logger.dart';
 
-import 'package:hiddify/core/logger/logger_controller.dart';
-import 'package:hiddify/core/model/environment.dart';
-import 'package:hiddify/core/preferences/preferences_provider.dart';
-import 'package:hiddify/utils/custom_loggers.dart';
+import 'package:vpnchik/core/logger/logger_controller.dart';
+import 'package:vpnchik/core/model/environment.dart';
+import 'package:vpnchik/core/preferences/preferences_provider.dart';
+import 'package:vpnchik/utils/custom_loggers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +20,7 @@ bool _testCrashReport = false;
 class AnalyticsController extends _$AnalyticsController with AppLogger {
   @override
   Future<bool> build() async {
-    return _preferences.getBool(enableAnalyticsPrefKey) ?? true;
+    return _preferences.getBool(enableAnalyticsPrefKey) ?? false;
   }
 
   SharedPreferences get _preferences => ref.read(sharedPreferencesProvider).requireValue;

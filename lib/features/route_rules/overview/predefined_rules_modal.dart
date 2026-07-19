@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/features/route_rules/notifier/rules_notifier.dart';
-import 'package:hiddify/hiddifycore/generated/v2/config/route_rule.pb.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/features/route_rules/notifier/rules_notifier.dart';
+import 'package:vpnchik/hiddifycore/generated/v2/config/route_rule.pb.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class PredefinedRulesModal extends HookConsumerWidget {

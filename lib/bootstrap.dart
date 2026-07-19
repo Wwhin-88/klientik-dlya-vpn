@@ -4,30 +4,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:hiddify/core/analytics/analytics_controller.dart';
-import 'package:hiddify/core/app_info/app_info_provider.dart';
-import 'package:hiddify/core/directories/directories_provider.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/logger/logger.dart';
-import 'package:hiddify/core/logger/logger_controller.dart';
-import 'package:hiddify/core/model/environment.dart';
-import 'package:hiddify/core/preferences/general_preferences.dart';
-import 'package:hiddify/core/preferences/preferences_migration.dart';
-import 'package:hiddify/core/preferences/preferences_provider.dart';
-import 'package:hiddify/features/app/widget/app.dart';
-import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
-import 'package:hiddify/features/chain/model/chain_enum.dart';
-import 'package:hiddify/features/chain/notifier/chain_profile_notifier.dart';
+import 'package:vpnchik/core/analytics/analytics_controller.dart';
+import 'package:vpnchik/core/app_info/app_info_provider.dart';
+import 'package:vpnchik/core/directories/directories_provider.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/core/logger/logger.dart';
+import 'package:vpnchik/core/logger/logger_controller.dart';
+import 'package:vpnchik/core/model/environment.dart';
+import 'package:vpnchik/core/preferences/general_preferences.dart';
+import 'package:vpnchik/core/hardcoded_config.dart';
+import 'package:vpnchik/core/preferences/preferences_migration.dart';
+import 'package:vpnchik/core/preferences/preferences_provider.dart';
+import 'package:vpnchik/features/app/widget/app.dart';
+import 'package:vpnchik/features/auto_start/notifier/auto_start_notifier.dart';
+import 'package:vpnchik/features/chain/model/chain_enum.dart';
+import 'package:vpnchik/features/chain/notifier/chain_profile_notifier.dart';
 
-import 'package:hiddify/features/log/data/log_data_providers.dart';
-import 'package:hiddify/features/profile/data/profile_data_providers.dart';
-import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
-import 'package:hiddify/features/system_tray/notifier/system_tray_notifier.dart';
-import 'package:hiddify/features/window/notifier/window_notifier.dart';
-import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
-import 'package:hiddify/riverpod_observer.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/features/log/data/log_data_providers.dart';
+import 'package:vpnchik/features/connection/notifier/connection_notifier.dart';
+import 'package:vpnchik/features/profile/data/profile_data_providers.dart';
+import 'package:vpnchik/features/profile/model/profile_entity.dart';
+import 'package:vpnchik/features/profile/notifier/active_profile_notifier.dart';
+import 'package:vpnchik/features/proxy/active/active_proxy_notifier.dart';
+import 'package:vpnchik/features/system_tray/notifier/system_tray_notifier.dart';
+import 'package:vpnchik/features/window/notifier/window_notifier.dart';
+import 'package:vpnchik/hiddifycore/hiddify_core_service_provider.dart';
+import 'package:vpnchik/riverpod_observer.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -98,6 +101,31 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
     () => container.read(chainProfileNotifierProvider(ChainType.unblocker).future),
   );
   await _safeInit("hiddify-core", () => container.read(hiddifyCoreServiceProvider).init());
+
+  await _init("hardcoded profile", () async {
+    final hardcodedCreated = container.read(Preferences.hardcodedProfileCreated);
+    if (hardcodedCreated) return;
+
+    final repo = container.read(profileRepositoryProvider).requireValue;
+    final result = await repo
+        .addLocal(
+          HardcodedConfig.vlessUrl,
+          userOverride: UserOverride(name: HardcodedConfig.profileName),
+        )
+        .run();
+
+    result.match(
+      (failure) {
+        Logger.bootstrap.error("hardcoded profile creation failed", failure);
+      },
+      (_) {
+        Logger.bootstrap.info("hardcoded profile created, triggering auto-connect");
+        container.read(connectionNotifierProvider.notifier).mayConnect();
+      },
+    );
+
+    await container.read(Preferences.hardcodedProfileCreated.notifier).update(true);
+  });
 
   // Eagerly listen to activeProxyNotifierProvider to force synchronous evaluation in microtasks,
   // avoiding lazy build-phase flushes and sibling dependency collisions on the Home page.

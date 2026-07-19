@@ -5,26 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hiddify/core/localization/locale_extensions.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/model/constants.dart';
-import 'package:hiddify/core/router/go_router/go_router_notifier.dart';
-import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
-import 'package:hiddify/core/theme/app_theme.dart';
-import 'package:hiddify/core/theme/theme_preferences.dart';
-import 'package:hiddify/features/app_update/notifier/app_update_notifier.dart';
-import 'package:hiddify/features/connection/widget/connection_wrapper.dart';
-import 'package:hiddify/features/per_app_proxy/overview/per_app_proxy_service_notifier.dart';
-import 'package:hiddify/features/profile/notifier/profiles_update_notifier.dart';
-import 'package:hiddify/features/shortcut/shortcut_wrapper.dart';
-import 'package:hiddify/features/system_tray/notifier/system_tray_notifier.dart';
-import 'package:hiddify/features/window/widget/window_wrapper.dart';
-import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/localization/locale_extensions.dart';
+import 'package:vpnchik/core/localization/locale_preferences.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/core/model/constants.dart';
+import 'package:vpnchik/core/router/go_router/go_router_notifier.dart';
+import 'package:vpnchik/core/router/go_router/helper/active_breakpoint_notifier.dart';
+import 'package:vpnchik/core/theme/app_theme.dart';
+import 'package:vpnchik/core/theme/theme_preferences.dart';
+import 'package:vpnchik/features/app_update/notifier/app_update_notifier.dart';
+import 'package:vpnchik/features/connection/widget/connection_wrapper.dart';
+import 'package:vpnchik/features/per_app_proxy/overview/per_app_proxy_service_notifier.dart';
+import 'package:vpnchik/features/profile/notifier/profiles_update_notifier.dart';
+import 'package:vpnchik/features/shortcut/shortcut_wrapper.dart';
+import 'package:vpnchik/features/system_tray/notifier/system_tray_notifier.dart';
+import 'package:vpnchik/features/window/widget/window_wrapper.dart';
+import 'package:vpnchik/hiddifycore/hiddify_core_service_provider.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:toastification/toastification.dart';
-import 'package:upgrader/upgrader.dart';
+// upgrader disabled
 
 bool _debugAccessibility = false;
 bool isOnPauseCalled = false;
@@ -59,7 +59,6 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
     final locale = ref.watch(localePreferencesProvider);
     final themeMode = ref.watch(themePreferencesProvider);
     final theme = AppTheme(themeMode, locale.preferredFontFamily);
-    final upgrader = ref.watch(upgraderProvider);
     final activeBreakpoint = Breakpoint(context).activeBreakpoint;
 
     ref.listen(foregroundProfilesUpdateNotifierProvider, (_, _) {});
@@ -85,17 +84,13 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
                   supportedLocales: AppLocaleUtils.supportedLocales,
                   localizationsDelegates: GlobalMaterialLocalizations.delegates,
                   debugShowCheckedModeBanner: false,
-                  themeMode: themeMode.flutterThemeMode,
+                  themeMode: ThemeMode.light, // vpnchik kawaii: force light mode
                   theme: theme.lightTheme(lightColorScheme),
                   darkTheme: theme.darkTheme(darkColorScheme),
                   title: Constants.appName,
                   builder: (context, child) {
                     final theme = Theme.of(context);
-                    child = UpgradeAlert(
-                      upgrader: upgrader,
-                      navigatorKey: router.routerDelegate.navigatorKey,
-                      child: child ?? const SizedBox(),
-                    );
+                    child = child ?? const SizedBox();
                     if (kDebugMode && _debugAccessibility) {
                       return AccessibilityTools(checkFontOverflows: true, child: child);
                     }

@@ -1,7 +1,7 @@
-import 'package:hiddify/core/directories/directories_provider.dart';
-import 'package:hiddify/features/log/data/log_path_resolver.dart';
-import 'package:hiddify/features/log/data/log_repository.dart';
-import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
+import 'package:vpnchik/core/directories/directories_provider.dart';
+import 'package:vpnchik/features/log/data/log_path_resolver.dart';
+import 'package:vpnchik/features/log/data/log_repository.dart';
+import 'package:vpnchik/hiddifycore/hiddify_core_service_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'log_data_providers.g.dart';

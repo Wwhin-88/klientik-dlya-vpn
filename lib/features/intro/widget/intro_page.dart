@@ -1,38 +1,28 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
-import 'package:hiddify/core/analytics/analytics_controller.dart';
-import 'package:hiddify/core/http_client/dio_http_client.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/model/constants.dart';
-import 'package:hiddify/core/model/region.dart';
-import 'package:hiddify/core/preferences/general_preferences.dart';
-import 'package:hiddify/features/common/general_pref_tiles.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
-import 'package:hiddify/features/settings/widget/preference_tile.dart';
-import 'package:hiddify/gen/assets.gen.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/analytics/analytics_controller.dart';
+import 'package:vpnchik/core/http_client/dio_http_client.dart';
+import 'package:vpnchik/core/localization/locale_preferences.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/core/model/constants.dart';
+import 'package:vpnchik/core/model/region.dart';
+import 'package:vpnchik/core/preferences/general_preferences.dart';
+import 'package:vpnchik/features/common/general_pref_tiles.dart';
+import 'package:vpnchik/features/settings/data/config_option_repository.dart';
+import 'package:vpnchik/features/settings/widget/preference_tile.dart';
+import 'package:vpnchik/gen/assets.gen.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class IntroPage extends HookConsumerWidget with PresLogger {
   const IntroPage({super.key});
 
   static bool locationInfoLoaded = false;
-
-  // for focus management
-  KeyEventResult _handleKeyEvent(KeyEvent event, String key) {
-    if (KeyboardConst.select.contains(event.logicalKey) && event is KeyUpEvent) {
-      UriUtils.tryLaunch(Uri.parse(IntroConst.url[key]!));
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,148 +36,154 @@ class IntroPage extends HookConsumerWidget with PresLogger {
       locationInfoLoaded = true;
     }
 
-    // for focus management
-    final focusStates = <String, ValueNotifier<bool>>{
-      IntroConst.termsAndConditionsKey: useState<bool>(false),
-      IntroConst.githubKey: useState<bool>(false),
-      IntroConst.licenseKey: useState<bool>(false),
-    };
-    final focusNodes = <String, FocusNode>{
-      IntroConst.termsAndConditionsKey: useFocusNode(),
-      IntroConst.githubKey: useFocusNode(),
-      IntroConst.licenseKey: useFocusNode(),
-    };
-    useEffect(() {
-      for (final entry in focusNodes.entries) {
-        entry.value.addListener(() => focusStates[entry.key]!.value = entry.value.hasPrimaryFocus);
-      }
-      return null;
-    }, []);
-
     return Scaffold(
-      body: Center(
-        child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 620),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = constraints.maxWidth > IntroConst.maxwidth
-                          ? IntroConst.maxwidth
-                          : constraints.maxWidth;
-                      final size = width * 0.4;
-                      return Assets.images.logo.svg(width: size, height: size);
-                    },
-                  ),
-                  const Gap(16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      t.intro.banner,
-                      style: theme.textTheme.bodyLarge,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Gap(24),
-                  const LocalePrefTile(),
-                  ChoicePreferenceWidget(
-                    selected: ref.watch(ConfigOptions.region),
-                    preferences: ref.watch(ConfigOptions.region.notifier),
-                    choices: Region.values,
-                    title: t.pages.settings.routing.generalOptions.region,
-                    showFlag: true,
-                    icon: Icons.place_rounded,
-                    presentChoice: (value) => value.present(t),
-                    onChanged: (val) async {
-                      await ref.read(ConfigOptions.directDnsAddress.notifier).reset();
-                    },
-                  ),
-                  const EnableAnalyticsPrefTile(),
-                  const Gap(24),
-                  Focus(
-                    focusNode: focusNodes[IntroConst.termsAndConditionsKey],
-                    onKeyEvent: (node, event) => _handleKeyEvent(event, IntroConst.termsAndConditionsKey),
-                    child: Text.rich(
-                      t.intro.termsAndPolicyCaution(
-                        tap: (text) => TextSpan(
-                          text: text,
-                          style: TextStyle(
-                            color: focusStates[IntroConst.termsAndConditionsKey]!.value ? Colors.green : Colors.blue,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () async {
-                              await UriUtils.tryLaunch(Uri.parse(Constants.termsAndConditionsUrl));
-                            },
-                        ),
-                      ),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-                  const Gap(8),
-                  Focus(
-                    focusNode: focusNodes[IntroConst.githubKey],
-                    onKeyEvent: (node, event) => _handleKeyEvent(event, IntroConst.githubKey),
-                    child: Text.rich(
-                      t.intro.info(
-                        tap_source: (text) => TextSpan(
-                          text: text,
-                          style: TextStyle(
-                            color: focusStates[IntroConst.githubKey]!.value ? Colors.green : Colors.blue,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () async {
-                              await UriUtils.tryLaunch(Uri.parse(Constants.githubUrl));
-                            },
-                        ),
-                        tap_license: (text) => TextSpan(
-                          text: text,
-                          style: TextStyle(
-                            color: focusStates[IntroConst.githubKey]!.value ? Colors.green : Colors.blue,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () async {
-                              await UriUtils.tryLaunch(Uri.parse(Constants.licenseUrl));
-                            },
-                        ),
-                      ),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-                  // only for managing license node focus
-                  Focus(
-                    focusNode: focusNodes[IntroConst.licenseKey],
-                    onKeyEvent: (node, event) => _handleKeyEvent(event, IntroConst.licenseKey),
-                    child: const Gap(88),
-                  ),
-                ],
-              ),
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFFE4EC), // light pastel pink
+              Color(0xFFFFF0F3), // warm light pink
+              Color(0xFFFFFAF5), // creamy white
+            ],
           ),
         ),
+        child: Stack(
+          children: [
+            // Floating hearts decoration
+            Positioned(
+              top: 60,
+              right: 40,
+              child: FaIcon(FontAwesomeIcons.solidHeart, size: 20, color: const Color(0xFFF8BBD0).withOpacity(0.3)),
+            ),
+            Positioned(
+              top: 120,
+              left: 30,
+              child: FaIcon(FontAwesomeIcons.solidHeart, size: 14, color: const Color(0xFFFFD1B3).withOpacity(0.3)),
+            ),
+            Positioned(
+              bottom: 160,
+              right: 60,
+              child: FaIcon(FontAwesomeIcons.solidHeart, size: 16, color: const Color(0xFFD1C4E9).withOpacity(0.25)),
+            ),
+            Positioned(
+              bottom: 200,
+              left: 50,
+              child: FaIcon(FontAwesomeIcons.star, size: 12, color: const Color(0xFFF8BBD0).withOpacity(0.3)),
+            ),
+            Positioned(
+              top: 200,
+              right: 80,
+              child: FaIcon(FontAwesomeIcons.star, size: 10, color: const Color(0xFFFFD1B3).withOpacity(0.3)),
+            ),
+            Center(
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final width = constraints.maxWidth > IntroConst.maxwidth
+                                ? IntroConst.maxwidth
+                                : constraints.maxWidth;
+                            final size = width * 0.4;
+                            return Assets.images.logo.svg(width: size, height: size);
+                          },
+                        ),
+                        const Gap(16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            t.intro.banner,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: const Color(0xFF3D2C2E).withOpacity(0.7),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Gap(24),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFAF5).withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0xFFF8BBD0).withOpacity(0.2)),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              const LocalePrefTile(),
+                              ChoicePreferenceWidget(
+                                selected: ref.watch(ConfigOptions.region),
+                                preferences: ref.watch(ConfigOptions.region.notifier),
+                                choices: Region.values,
+                                title: t.pages.settings.routing.generalOptions.region,
+                                showFlag: true,
+                                icon: Icons.place_rounded,
+                                presentChoice: (value) => value.present(t),
+                                onChanged: (val) async {
+                                  await ref.read(ConfigOptions.directDnsAddress.notifier).reset();
+                                },
+                              ),
+                              const EnableAnalyticsPrefTile(),
+                            ],
+                          ),
+                        ),
+                        const Gap(32),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: isStarting.value
-            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator())
-            : const Icon(Icons.rocket_launch),
-        label: Text(t.common.start, style: theme.textTheme.titleMedium),
-        onPressed: () async {
-          if (isStarting.value) return;
-          isStarting.value = true;
-          if (!ref.read(analyticsControllerProvider).requireValue) {
-            loggy.info("disabling analytics per user request");
-            try {
-              await ref.read(analyticsControllerProvider.notifier).disableAnalytics();
-            } catch (error, stackTrace) {
-              loggy.error("could not disable analytics", error, stackTrace);
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: FloatingActionButton.extended(
+          backgroundColor: const Color(0xFFF8BBD0),
+          foregroundColor: const Color(0xFF3D2C2E),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          icon: isStarting.value
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF3D2C2E),
+                  ),
+                )
+              : const FaIcon(FontAwesomeIcons.star, size: 18),
+          label: Text(
+            '✨ ${t.common.start} ✨',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          onPressed: () async {
+            if (isStarting.value) return;
+            isStarting.value = true;
+            if (!ref.read(analyticsControllerProvider).requireValue) {
+              loggy.info("disabling analytics per user request");
+              try {
+                await ref.read(analyticsControllerProvider.notifier).disableAnalytics();
+              } catch (error, stackTrace) {
+                loggy.error("could not disable analytics", error, stackTrace);
+              }
             }
-          }
-          await ref.read(Preferences.introCompleted.notifier).update(true);
-        },
+            await ref.read(Preferences.introCompleted.notifier).update(true);
+          },
+        ),
       ),
     );
   }

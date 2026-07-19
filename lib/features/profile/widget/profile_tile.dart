@@ -4,20 +4,20 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/model/constants.dart';
-import 'package:hiddify/core/model/failures.dart';
-import 'package:hiddify/core/notification/in_app_notification_controller.dart';
-import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
-import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
-import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
-import 'package:hiddify/core/widget/adaptive_icon.dart';
-import 'package:hiddify/core/widget/adaptive_menu.dart';
-import 'package:hiddify/features/profile/model/profile_entity.dart';
-import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
-import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
-import 'package:hiddify/gen/fonts.gen.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/core/model/constants.dart';
+import 'package:vpnchik/core/model/failures.dart';
+import 'package:vpnchik/core/notification/in_app_notification_controller.dart';
+import 'package:vpnchik/core/router/bottom_sheets/bottom_sheets_notifier.dart';
+import 'package:vpnchik/core/router/dialog/dialog_notifier.dart';
+import 'package:vpnchik/core/router/go_router/helper/active_breakpoint_notifier.dart';
+import 'package:vpnchik/core/widget/adaptive_icon.dart';
+import 'package:vpnchik/core/widget/adaptive_menu.dart';
+import 'package:vpnchik/features/profile/model/profile_entity.dart';
+import 'package:vpnchik/features/profile/notifier/profile_notifier.dart';
+import 'package:vpnchik/features/profile/overview/profiles_notifier.dart';
+import 'package:vpnchik/gen/fonts.gen.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -554,7 +554,7 @@ class NewSiteSubscriptionInfo extends HookConsumerWidget {
   }
 }
 
-// TODO change colors
+// Pastel-styled traffic indicator for vpnchik kawaii
 class RemainingTrafficIndicator extends StatelessWidget {
   const RemainingTrafficIndicator(this.ratio, {super.key});
 
@@ -562,35 +562,20 @@ class RemainingTrafficIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final startColor = ratio < 0.25
-    //     ? const Color.fromRGBO(93, 205, 251, 1.0)
-    //     : ratio < 0.65
-    //         ? const Color.fromRGBO(205, 199, 64, 1.0)
-    //         : const Color.fromRGBO(241, 82, 81, 1.0);
-    // final endColor = ratio < 0.25
-    //     ? const Color.fromRGBO(49, 146, 248, 1.0)
-    //     : ratio < 0.65
-    //         ? const Color.fromRGBO(98, 115, 32, 1.0)
-    //         : const Color.fromRGBO(139, 30, 36, 1.0);
-    return LinearProgressIndicator(value: ratio, borderRadius: BorderRadius.circular(16), minHeight: 6);
-    // return HorizontalPercentIndicator(
-    //   height: 6,
+    final Color barColor = ratio < 0.25
+        ? const Color(0xFFA8D5BA) // pastel mint green
+        : ratio < 0.65
+            ? const Color(0xFFFFD1B3) // pastel peach
+            : const Color(0xFFE8A0BF); // pastel rose
 
-    //   borderRadius: 16,
-    //   loadingPercent: ratio,
-    //   // inactiveTrackColor: Color.fromRGBO(r, g, b, opacity),
-
-    //   activeTrackColor: [startColor, endColor],
-    // );
-    // return LinearPercentIndicator(
-    //     // percent: ratio,
-    //     // animation: false,
-    //     // padding: EdgeInsets.zero,
-    //     // lineHeight: 6,
-    //     // barRadius: const Radius.circular(16),
-    //     // linearGradient: LinearGradient(
-    //     //   colors: [startColor, endColor],
-    //     // ),
-    //     );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: LinearProgressIndicator(
+        value: ratio,
+        backgroundColor: const Color(0xFFF8BBD0).withOpacity(0.12),
+        valueColor: AlwaysStoppedAnimation<Color>(barColor),
+        minHeight: 6,
+      ),
+    );
   }
 }

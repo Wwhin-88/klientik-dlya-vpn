@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:hiddify/core/haptic/haptic_service.dart';
-import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/notification/in_app_notification_controller.dart';
-import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
-import 'package:hiddify/features/profile/data/profile_data_providers.dart';
-import 'package:hiddify/features/profile/data/profile_repository.dart';
-import 'package:hiddify/features/profile/model/profile_entity.dart';
-import 'package:hiddify/features/profile/model/profile_sort_enum.dart';
-import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
-import 'package:hiddify/utils/utils.dart';
+import 'package:vpnchik/core/haptic/haptic_service.dart';
+import 'package:vpnchik/core/localization/translations.dart';
+import 'package:vpnchik/core/notification/in_app_notification_controller.dart';
+import 'package:vpnchik/features/connection/notifier/connection_notifier.dart';
+import 'package:vpnchik/features/profile/data/profile_data_providers.dart';
+import 'package:vpnchik/features/profile/data/profile_repository.dart';
+import 'package:vpnchik/features/profile/model/profile_entity.dart';
+import 'package:vpnchik/features/profile/model/profile_sort_enum.dart';
+import 'package:vpnchik/features/profile/notifier/active_profile_notifier.dart';
+import 'package:vpnchik/features/settings/data/config_option_repository.dart';
+import 'package:vpnchik/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profiles_notifier.g.dart';
