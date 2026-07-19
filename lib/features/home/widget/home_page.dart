@@ -10,7 +10,7 @@ import 'package:vpnchik/features/profile/notifier/active_profile_notifier.dart';
 import 'package:vpnchik/features/profile/widget/profile_tile.dart';
 import 'package:vpnchik/features/proxy/active/active_proxy_card.dart';
 import 'package:vpnchik/features/proxy/active/active_proxy_delay_indicator.dart';
-import 'package:vpnchik/gen/assets.gen.dart';
+import 'package:vpnchik/core/theme/theme_switcher.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -31,8 +31,6 @@ class HomePage extends HookConsumerWidget {
         scrolledUnderElevation: 0,
         title: Row(
           children: [
-            Assets.images.logo.svg(height: 22),
-            const Gap(6),
             Text(
               'vpnchik',
               style: TextStyle(
@@ -42,8 +40,6 @@ class HomePage extends HookConsumerWidget {
                 color: const Color(0xFF3D2C2E),
               ),
             ),
-            const Gap(4),
-            FaIcon(FontAwesomeIcons.solidHeart, size: 14, color: const Color(0xFFF8BBD0)),
             const Gap(6),
             AppVersionLabel(),
           ],
@@ -54,8 +50,8 @@ class HomePage extends HookConsumerWidget {
       ),
       body: Stack(
         children: [
-          // Floating kawaii background
-          const AnimeBackground(),
+          // Floating kawaii background — only in cute mode
+          if (ref.watch(isCuteModeProvider)) const AnimeBackground(),
           // Content layer
           Center(
             child: ConstrainedBox(

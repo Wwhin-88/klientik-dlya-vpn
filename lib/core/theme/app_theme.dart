@@ -104,6 +104,75 @@ class AppTheme {
     return lightTheme(darkColorScheme);
   }
 
+  /// Boring monochrome theme — white surfaces, grey backgrounds, no pastels.
+  static ThemeData monochromeTheme() {
+    const Color bgGrey = Color(0xFFF5F5F5);
+    const Color darkText = Color(0xFF212121);
+    const Color surfaceWhite = Colors.white;
+    const Color primaryGrey = Color(0xFF616161);
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: bgGrey,
+        primary: primaryGrey,
+        secondary: Color(0xFF9E9E9E),
+        surface: surfaceWhite,
+        brightness: Brightness.light,
+      ).copyWith(
+        surface: surfaceWhite,
+        primary: primaryGrey,
+        secondary: const Color(0xFF9E9E9E),
+        onPrimary: darkText,
+        onSecondary: darkText,
+        onSurface: darkText,
+      ),
+      scaffoldBackgroundColor: bgGrey,
+      fontFamily: 'Nunito',
+      textTheme: GoogleFonts.nunitoTextTheme().copyWith(
+        displayLarge: GoogleFonts.getFont('Nunito'),
+        displayMedium: GoogleFonts.getFont('Nunito'),
+        displaySmall: GoogleFonts.getFont('Nunito'),
+        headlineLarge: GoogleFonts.getFont('Nunito'),
+        headlineMedium: GoogleFonts.getFont('Nunito'),
+        headlineSmall: GoogleFonts.getFont('Nunito'),
+        titleLarge: GoogleFonts.getFont('Nunito'),
+        titleMedium: GoogleFonts.getFont('Nunito'),
+        titleSmall: GoogleFonts.getFont('Nunito'),
+        bodyLarge: GoogleFonts.getFont('Nunito'),
+        bodyMedium: GoogleFonts.getFont('Nunito'),
+        bodySmall: GoogleFonts.getFont('Nunito'),
+        labelLarge: GoogleFonts.getFont('Nunito'),
+        labelMedium: GoogleFonts.getFont('Nunito'),
+        labelSmall: GoogleFonts.getFont('Nunito'),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: surfaceWhite,
+        foregroundColor: darkText,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: darkText,
+          letterSpacing: -0.3,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: surfaceWhite,
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primaryGrey,
+        foregroundColor: surfaceWhite,
+      ),
+      extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
+    );
+  }
+
   CupertinoThemeData cupertinoThemeData(bool sysDark, ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) {
     final bool isDark = switch (mode) {
       AppThemeMode.system => sysDark,

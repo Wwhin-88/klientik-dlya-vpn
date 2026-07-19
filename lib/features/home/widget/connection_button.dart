@@ -6,6 +6,7 @@ import 'package:vpnchik/core/localization/translations.dart';
 import 'package:vpnchik/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:vpnchik/core/router/dialog/dialog_notifier.dart';
 import 'package:vpnchik/core/theme/theme_extensions.dart';
+import 'package:vpnchik/core/theme/theme_switcher.dart';
 import 'package:vpnchik/core/widget/animated_text.dart';
 import 'package:vpnchik/features/connection/model/connection_status.dart';
 import 'package:vpnchik/features/connection/notifier/connection_notifier.dart';
@@ -21,6 +22,7 @@ class ConnectionButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    final isCute = ref.watch(isCuteModeProvider);
     final connectionStatus = ref.watch(connectionNotifierProvider);
     final activeProxy = ref.watch(activeProxyNotifierProvider);
     final delay = activeProxy.valueOrNull?.urlTestDelay ?? 0;
@@ -64,6 +66,7 @@ class ConnectionButton extends HookConsumerWidget {
       label: switch (connectionStatus) {
         AsyncData(value: Connected()) when requiresReconnect == true => t.connection.reconnect,
         AsyncData(value: Connected()) when delay <= 0 || delay >= 65000 => t.connection.connecting,
+        AsyncData(value: Disconnected()) => isCute ? 'Тыцни что бы включить 💗' : t.connection.tapToConnect,
         AsyncData(value: final status) => status.present(t),
         _ => "",
       },

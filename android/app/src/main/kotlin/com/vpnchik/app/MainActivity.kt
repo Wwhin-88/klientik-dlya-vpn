@@ -1,6 +1,7 @@
 package com.vpnchik.app
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
@@ -19,6 +20,7 @@ import com.vpnchik.app.constant.ServiceMode
 import com.vpnchik.app.constant.Status
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +47,20 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
         super.configureFlutterEngine(flutterEngine)
         instance = this
         reconnect()
+
+        // MethodChannel for app icon switching (normal ⇄ heart)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.vpnchik.app/icon").apply {
+            setMethodCallHandler { call, result ->
+                if (call.method == "setIcon") {
+                    val icon = call.argument<String>("icon") ?: "default"
+                    toggleAppIcon(icon)
+                    result.success(true)
+                } else {
+                    result.notImplemented()
+                }
+            }
+        }
+
         flutterEngine.plugins.add(MethodHandler(lifecycleScope))
         flutterEngine.plugins.add(PlatformSettingsHandler())
         flutterEngine.plugins.add(EventHandler())
@@ -135,6 +151,24 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
     override fun onDestroy() {
         connection.disconnect()
         super.onDestroy()
+    }
+
+    /// Switch between boring (default) and heart launcher icon.
+    /// Uses PackageManager to enable/disable activity-aliases.
+    private fun toggleAppIcon(icon: String) {
+        val pm = packageManager
+        val aliasDefault = ComponentName(this, "$packageName.MainActivityAliasDefault")
+        val aliasHeart = ComponentName(this, "$packageName.MainActivityAliasHeart")
+        val enableDefault = (icon != "heart")
+        pm.setComponentEnabledSetting(aliasDefault,
+            if (enableDefault) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP)
+        pm.setComponentEnabledSetting(aliasHeart,
+            if (!enableDefault) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP)
+        Log.d(TAG, "app icon set to: ${if (enableDefault) "default" else "heart"}")
     }
 
     @SuppressLint("NewApi")

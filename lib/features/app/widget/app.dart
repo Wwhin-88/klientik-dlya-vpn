@@ -13,6 +13,7 @@ import 'package:vpnchik/core/router/go_router/go_router_notifier.dart';
 import 'package:vpnchik/core/router/go_router/helper/active_breakpoint_notifier.dart';
 import 'package:vpnchik/core/theme/app_theme.dart';
 import 'package:vpnchik/core/theme/theme_preferences.dart';
+import 'package:vpnchik/core/theme/theme_switcher.dart';
 import 'package:vpnchik/features/app_update/notifier/app_update_notifier.dart';
 import 'package:vpnchik/features/connection/widget/connection_wrapper.dart';
 import 'package:vpnchik/features/per_app_proxy/overview/per_app_proxy_service_notifier.dart';
@@ -58,6 +59,7 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
     final router = ref.watch(goRouterNotiferProvider);
     final locale = ref.watch(localePreferencesProvider);
     final themeMode = ref.watch(themePreferencesProvider);
+    final isCuteMode = ref.watch(isCuteModeProvider);
     final theme = AppTheme(themeMode, locale.preferredFontFamily);
     final activeBreakpoint = Breakpoint(context).activeBreakpoint;
 
@@ -84,9 +86,9 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
                   supportedLocales: AppLocaleUtils.supportedLocales,
                   localizationsDelegates: GlobalMaterialLocalizations.delegates,
                   debugShowCheckedModeBanner: false,
-                  themeMode: ThemeMode.light, // vpnchik kawaii: force light mode
-                  theme: theme.lightTheme(lightColorScheme),
-                  darkTheme: theme.darkTheme(darkColorScheme),
+                  themeMode: ThemeMode.light,
+                  theme: isCuteMode ? theme.lightTheme(lightColorScheme) : AppTheme.monochromeTheme(),
+                  darkTheme: isCuteMode ? theme.darkTheme(darkColorScheme) : AppTheme.monochromeTheme(),
                   title: Constants.appName,
                   builder: (context, child) {
                     final theme = Theme.of(context);
@@ -94,15 +96,19 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
                     if (kDebugMode && _debugAccessibility) {
                       return AccessibilityTools(checkFontOverflows: true, child: child);
                     }
-                    return AnnotatedRegion<SystemUiOverlayStyle>(
-                      value: SystemUiOverlayStyle(
-                        statusBarColor: theme.scaffoldBackgroundColor,
-                        systemNavigationBarColor: theme.scaffoldBackgroundColor,
-                        systemNavigationBarIconBrightness: theme.brightness == Brightness.dark
-                            ? Brightness.light
-                            : Brightness.dark,
+                    return AnimatedTheme(
+                      data: theme,
+                      duration: const Duration(milliseconds: 400),
+                      child: AnnotatedRegion<SystemUiOverlayStyle>(
+                        value: SystemUiOverlayStyle(
+                          statusBarColor: theme.scaffoldBackgroundColor,
+                          systemNavigationBarColor: theme.scaffoldBackgroundColor,
+                          systemNavigationBarIconBrightness: theme.brightness == Brightness.dark
+                              ? Brightness.light
+                              : Brightness.dark,
+                        ),
+                        child: child,
                       ),
-                      child: child,
                     );
                   },
                 );
