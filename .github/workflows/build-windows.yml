@@ -1,0 +1,40 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Download hiddify-core (Windows)
+        run: |
+          $version = (Get-Content dependencies.properties | Select-String "core.version=(.*)").Matches.Groups[1].Value
+          curl -L "https://github.com/hiddify/hiddify-core/releases/download/v$version/hiddify-lib-windows-amd64.tar.gz" -o core.tar.gz
+          tar xzf core.tar.gz -C hiddify-core/bin/
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows EXE
+        run: flutter build windows --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vpnchik-windows
+          path: build/windows/x64/runner/Release/
