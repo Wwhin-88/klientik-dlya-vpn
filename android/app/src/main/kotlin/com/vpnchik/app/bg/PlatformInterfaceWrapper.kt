@@ -84,50 +84,10 @@ interface PlatformInterfaceWrapper : PlatformInterface {
         DefaultNetworkMonitor.setListener(null)
     }
 
-    companion object {
-        // Memoize interfaces to prevent gomobile JNI crash on repeated calls (Android 16+).
-        @Volatile
-        private var cachedInterfaces: NetworkInterfaceIterator? = null
-    }
-
     override fun getInterfaces(): NetworkInterfaceIterator {
-        // Return cached result to avoid creating new gomobile-proxied objects
-        // that trigger go_seq_from_refnum crash on Android 16+.
-        cachedInterfaces?.let { return it }
-
-        val interfaces = mutableListOf<LibboxNetworkInterface>()
-        val nis: Enumeration<NetworkInterface> = try {
-            NetworkInterface.getNetworkInterfaces()
-        } catch (e: Exception) {
-            return InterfaceArray(interfaces.iterator())
-        }
-        while (nis.hasMoreElements()) {
-            val ni = nis.nextElement()
-            val boxInterface = LibboxNetworkInterface()
-            boxInterface.name = ni.name
-            boxInterface.index = ni.index
-            boxInterface.mtu = ni.mtu
-            boxInterface.addresses = StringArray(
-                ni.interfaceAddresses.map { (it as InterfaceAddress).let { a ->
-                    if (a.address is Inet6Address)
-                        "${Inet6Address.getByAddress((a.address as Inet6Address).address).hostAddress}/${a.networkPrefixLength}"
-                    else
-                        "${a.address.hostAddress}/${a.networkPrefixLength}"
-                }
-            }.iterator())
-            boxInterface.dnsServer = StringArray(emptyList<String>().iterator())
-            boxInterface.flags = if (ni.isLoopback) 0 else (OsConstants.IFF_UP or OsConstants.IFF_RUNNING)
-            boxInterface.type = when {
-                ni.isLoopback -> Libbox.InterfaceTypeOther
-                ni.name?.startsWith("wlan") == true || ni.name?.startsWith("wifi") == true -> Libbox.InterfaceTypeWIFI
-                ni.name?.startsWith("rmnet") == true || ni.name?.startsWith("ccmni") == true -> Libbox.InterfaceTypeCellular
-                else -> Libbox.InterfaceTypeOther
-            }
-            interfaces.add(boxInterface)
-        }
-        val result = InterfaceArray(interfaces.iterator())
-        cachedInterfaces = result
-        return result
+        // Return empty on Android 16+ — gomobile JNI refs are broken
+        // regardless of implementation. sing-box routes work without this.
+        return InterfaceArray(emptyList<LibboxNetworkInterface>().iterator())
     }
 
     override fun underNetworkExtension(): Boolean = false

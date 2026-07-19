@@ -57,7 +57,7 @@ abstract class ConfigOptions {
 
   static final remoteDnsAddress = PreferencesNotifier.create<String, String>(
     "remote-dns-address",
-    "tcp://8.8.8.8",
+    "https://1.1.1.1/dns-query",
     possibleValues: List.of([
       "local",
       // "udp://223.5.5.5",
