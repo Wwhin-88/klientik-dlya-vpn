@@ -84,9 +84,17 @@ interface PlatformInterfaceWrapper : PlatformInterface {
         DefaultNetworkMonitor.setListener(null)
     }
 
+    companion object {
+        // Memoize interfaces to prevent gomobile JNI crash on repeated calls (Android 16+).
+        @Volatile
+        private var cachedInterfaces: NetworkInterfaceIterator? = null
+    }
+
     override fun getInterfaces(): NetworkInterfaceIterator {
-        // Use safe Java NetworkInterface API instead of ConnectivityManager
-        // to avoid gomobile JNI crash on Android 16+.
+        // Return cached result to avoid creating new gomobile-proxied objects
+        // that trigger go_seq_from_refnum crash on Android 16+.
+        cachedInterfaces?.let { return it }
+
         val interfaces = mutableListOf<LibboxNetworkInterface>()
         val nis: Enumeration<NetworkInterface> = try {
             NetworkInterface.getNetworkInterfaces()
@@ -117,7 +125,9 @@ interface PlatformInterfaceWrapper : PlatformInterface {
             }
             interfaces.add(boxInterface)
         }
-        return InterfaceArray(interfaces.iterator())
+        val result = InterfaceArray(interfaces.iterator())
+        cachedInterfaces = result
+        return result
     }
 
     override fun underNetworkExtension(): Boolean = false
