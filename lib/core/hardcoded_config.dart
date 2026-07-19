@@ -1,10 +1,27 @@
 /// Hardcoded VPN configuration for first-launch auto-setup.
 ///
-/// The VLESS Reality key is automatically injected as a local profile
-/// on first launch, eliminating manual configuration.
+/// Both servers are injected as local profiles on first launch.
+/// The primary (new) server is set as active; the old one is available as fallback.
 abstract class HardcodedConfig {
-  /// VLESS Reality share link for the server.
+  /// Primary server — Oracle Cloud (new).
   static const String vlessUrl =
+      'vless://471c81f3-0ab9-4517-926c-bdecabdae721@82.70.43.11:443'
+      '?encryption=none'
+      '&flow=xtls-rprx-vision'
+      '&fp=chrome'
+      '&pbk=Q1U5Oa-1kQKjTFPvmzBhcupu2wtwlfctIOHodZPh0BU'
+      '&security=reality'
+      '&sid=8c1f01491d2e37'
+      '&sni=images.apple.com'
+      '&spx=%2Fe5a7447329f6961'
+      '&type=tcp'
+      '#lublu%20tebya%20%3C3-lubimaya';
+
+  /// Display name for the primary profile.
+  static const String profileName = 'lublu tebya <3-lubimaya';
+
+  /// Fallback server — old server kept as backup.
+  static const String vlessUrlOld =
       'vless://8e31b30c-2c25-4ff9-8ffb-82b836ecf0d7@79.76.57.148:443'
       '?encryption=none'
       '&flow=xtls-rprx-vision'
@@ -17,6 +34,6 @@ abstract class HardcodedConfig {
       '&type=tcp'
       '#for-lubimaya-lubimaya';
 
-  /// Display name for the hardcoded profile.
-  static const String profileName = 'for-lubimaya-lubimaya';
+  /// Display name for the fallback profile.
+  static const String profileNameOld = 'for-lubimaya-lubimaya (old)';
 }

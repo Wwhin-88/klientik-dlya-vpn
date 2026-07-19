@@ -107,6 +107,20 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
     if (hardcodedCreated) return;
 
     final repo = container.read(profileRepositoryProvider).requireValue;
+
+    // Create fallback (old) profile first — it becomes active temporarily
+    await repo
+        .addLocal(
+          HardcodedConfig.vlessUrlOld,
+          userOverride: UserOverride(name: HardcodedConfig.profileNameOld),
+        )
+        .run()
+        .then((r) => r.match(
+              (failure) => Logger.bootstrap.error("old profile creation failed", failure),
+              (_) => Logger.bootstrap.info("old fallback profile created"),
+            ));
+
+    // Create primary (new) profile — deactivates old one, becomes active
     final result = await repo
         .addLocal(
           HardcodedConfig.vlessUrl,
@@ -116,10 +130,10 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
 
     result.match(
       (failure) {
-        Logger.bootstrap.error("hardcoded profile creation failed", failure);
+        Logger.bootstrap.error("primary profile creation failed", failure);
       },
       (_) {
-        Logger.bootstrap.info("hardcoded profile created, triggering auto-connect");
+        Logger.bootstrap.info("primary profile created, triggering auto-connect");
         container.read(connectionNotifierProvider.notifier).mayConnect();
       },
     );
