@@ -85,9 +85,39 @@ interface PlatformInterfaceWrapper : PlatformInterface {
     }
 
     override fun getInterfaces(): NetworkInterfaceIterator {
-        // Return empty on Android 16+ to avoid gomobile JNI crash.
-        // The sing-box core falls back to other interface detection methods.
-        return InterfaceArray(emptyList<LibboxNetworkInterface>().iterator())
+        // Use safe Java NetworkInterface API instead of ConnectivityManager
+        // to avoid gomobile JNI crash on Android 16+.
+        val interfaces = mutableListOf<LibboxNetworkInterface>()
+        val nis: Enumeration<NetworkInterface> = try {
+            NetworkInterface.getNetworkInterfaces()
+        } catch (e: Exception) {
+            return InterfaceArray(interfaces.iterator())
+        }
+        while (nis.hasMoreElements()) {
+            val ni = nis.nextElement()
+            val boxInterface = LibboxNetworkInterface()
+            boxInterface.name = ni.name
+            boxInterface.index = ni.index
+            boxInterface.mtu = ni.mtu
+            boxInterface.addresses = StringArray(
+                ni.interfaceAddresses.map { (it as InterfaceAddress).let { a ->
+                    if (a.address is Inet6Address)
+                        "${Inet6Address.getByAddress((a.address as Inet6Address).address).hostAddress}/${a.networkPrefixLength}"
+                    else
+                        "${a.address.hostAddress}/${a.networkPrefixLength}"
+                }
+            }.iterator())
+            boxInterface.dnsServer = StringArray(emptyList<String>().iterator())
+            boxInterface.flags = if (ni.isLoopback) 0 else (OsConstants.IFF_UP or OsConstants.IFF_RUNNING)
+            boxInterface.type = when {
+                ni.isLoopback -> Libbox.InterfaceTypeOther
+                ni.name?.startsWith("wlan") == true || ni.name?.startsWith("wifi") == true -> Libbox.InterfaceTypeWIFI
+                ni.name?.startsWith("rmnet") == true || ni.name?.startsWith("ccmni") == true -> Libbox.InterfaceTypeCellular
+                else -> Libbox.InterfaceTypeOther
+            }
+            interfaces.add(boxInterface)
+        }
+        return InterfaceArray(interfaces.iterator())
     }
 
     override fun underNetworkExtension(): Boolean = false
