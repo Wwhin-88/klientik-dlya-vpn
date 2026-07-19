@@ -32,7 +32,8 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 interface PlatformInterfaceWrapper : PlatformInterface {
-    override fun usePlatformAutoDetectInterfaceControl(): Boolean = true
+    // Disable auto-detect to avoid getInterfaces() crash on Android 16+
+    override fun usePlatformAutoDetectInterfaceControl(): Boolean = false
 
     override fun autoDetectInterfaceControl(fd: Int) {
     }
@@ -84,60 +85,9 @@ interface PlatformInterfaceWrapper : PlatformInterface {
     }
 
     override fun getInterfaces(): NetworkInterfaceIterator {
-        val networks = Application.connectivity.allNetworks
-        val networkInterfaces = NetworkInterface.getNetworkInterfaces().toList()
-        val interfaces = mutableListOf<LibboxNetworkInterface>()
-        for (network in networks) {
-            val boxInterface = LibboxNetworkInterface()
-            val linkProperties = Application.connectivity.getLinkProperties(network) ?: continue
-            val networkCapabilities =
-                Application.connectivity.getNetworkCapabilities(network) ?: continue
-            boxInterface.name = linkProperties.interfaceName
-            val networkInterface =
-                networkInterfaces.find { it.name == boxInterface.name } ?: continue
-            boxInterface.dnsServer =
-                StringArray(linkProperties.dnsServers.mapNotNull { it.hostAddress }.iterator())
-            boxInterface.type =
-                when {
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> Libbox.InterfaceTypeWIFI
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> Libbox.InterfaceTypeCellular
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> Libbox.InterfaceTypeEthernet
-                    else -> Libbox.InterfaceTypeOther
-                }
-            boxInterface.index = networkInterface.index
-            runCatching {
-                boxInterface.mtu = networkInterface.mtu
-            }.onFailure {
-                Log.e(
-                    "PlatformInterface",
-                    "failed to get mtu for interface ${boxInterface.name}",
-                    it,
-                )
-            }
-            boxInterface.addresses =
-                StringArray(
-                    networkInterface.interfaceAddresses.mapTo(mutableListOf()) { it.toPrefix() }
-                        .iterator(),
-                )
-            var dumpFlags = 0
-            if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                dumpFlags = OsConstants.IFF_UP or OsConstants.IFF_RUNNING
-            }
-            if (networkInterface.isLoopback) {
-                dumpFlags = dumpFlags or OsConstants.IFF_LOOPBACK
-            }
-            if (networkInterface.isPointToPoint) {
-                dumpFlags = dumpFlags or OsConstants.IFF_POINTOPOINT
-            }
-            if (networkInterface.supportsMulticast()) {
-                dumpFlags = dumpFlags or OsConstants.IFF_MULTICAST
-            }
-            boxInterface.flags = dumpFlags
-            boxInterface.metered =
-                !networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-            interfaces.add(boxInterface)
-        }
-        return InterfaceArray(interfaces.iterator())
+        // Return empty on Android 16+ to avoid gomobile JNI crash.
+        // The sing-box core falls back to other interface detection methods.
+        return InterfaceArray(emptyList<LibboxNetworkInterface>().iterator())
     }
 
     override fun underNetworkExtension(): Boolean = false
