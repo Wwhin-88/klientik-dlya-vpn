@@ -31,6 +31,10 @@ class HomePage extends HookConsumerWidget {
         scrolledUnderElevation: 0,
         title: Row(
           children: [
+            if (ref.watch(isCuteModeProvider)) ...[
+              FaIcon(FontAwesomeIcons.solidHeart, size: 14, color: const Color(0xFFF8BBD0)),
+              const Gap(4),
+            ],
             Text(
               'vpnchik',
               style: TextStyle(
