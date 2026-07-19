@@ -56,6 +56,11 @@ class BoxService(
     companion object {
         private const val TAG = "A/BoxService"
 
+        // Hold strong reference to PlatformInterface to prevent GC
+        // on Android 17+ which has stricter JNI reference management.
+        @Volatile
+        private var platformHolder: Any? = null
+
         private var initializeOnce = false
         private lateinit var workingDir: File
         private fun initialize() {
@@ -162,6 +167,8 @@ class BoxService(
             DefaultNetworkMonitor.start()
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
             val newService = try {
+                // Pin platformInterface to prevent JNI reference GC on Android 17+
+                platformHolder = platformInterface
                 Mobile.setup(
                     SetupOptions().also {
                         it.basePath = Settings.baseDir

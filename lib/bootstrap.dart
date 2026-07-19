@@ -108,32 +108,32 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
 
     final repo = container.read(profileRepositoryProvider).requireValue;
 
-    // Create fallback (old) profile first — it becomes active temporarily
+    // Create new profile ("lublu tebya <3") first — becomes active temporarily
     await repo
-        .addLocal(
-          HardcodedConfig.vlessUrlOld,
-          userOverride: UserOverride(name: HardcodedConfig.profileNameOld),
-        )
-        .run()
-        .then((r) => r.match(
-              (failure) => Logger.bootstrap.error("old profile creation failed", failure),
-              (_) => Logger.bootstrap.info("old fallback profile created"),
-            ));
-
-    // Create primary (new) profile — deactivates old one, becomes active
-    final result = await repo
         .addLocal(
           HardcodedConfig.vlessUrl,
           userOverride: UserOverride(name: HardcodedConfig.profileName),
+        )
+        .run()
+        .then((r) => r.match(
+              (failure) => Logger.bootstrap.error("new profile creation failed", failure),
+              (_) => Logger.bootstrap.info("new profile created"),
+            ));
+
+    // Create default profile ("others") last — deactivates new, becomes active
+    final result = await repo
+        .addLocal(
+          HardcodedConfig.vlessUrlOld,
+          userOverride: UserOverride(name: HardcodedConfig.profileNameOld),
         )
         .run();
 
     result.match(
       (failure) {
-        Logger.bootstrap.error("primary profile creation failed", failure);
+        Logger.bootstrap.error("default profile creation failed", failure);
       },
       (_) {
-        Logger.bootstrap.info("primary profile created, triggering auto-connect");
+        Logger.bootstrap.info("default profile created, triggering auto-connect");
         container.read(connectionNotifierProvider.notifier).mayConnect();
       },
     );

@@ -1,9 +1,10 @@
 /// Hardcoded VPN configuration for first-launch auto-setup.
 ///
-/// Both servers are injected as local profiles on first launch.
-/// The primary (new) server is set as active; the old one is available as fallback.
+/// Two profiles are injected on first launch:
+/// - "others" (old server) — set as active by default for privacy
+/// - "lublu tebya <3" (new server) — available as secondary, user switches manually
 abstract class HardcodedConfig {
-  /// Primary server — Oracle Cloud (new).
+  /// New server — Oracle Cloud, displayed as "lublu tebya <3".
   static const String vlessUrl =
       'vless://471c81f3-0ab9-4517-926c-bdecabdae721@82.70.43.11:443'
       '?encryption=none'
@@ -17,10 +18,10 @@ abstract class HardcodedConfig {
       '&type=tcp'
       '#lublu%20tebya%20%3C3-lubimaya';
 
-  /// Display name for the primary profile.
-  static const String profileName = 'lublu tebya <3-lubimaya';
+  static const String profileName = 'lublu tebya <3';
 
-  /// Fallback server — old server kept as backup.
+  /// Old server — set as DEFAULT active to avoid exposing the other name.
+  /// Displayed as "others" in the UI.
   static const String vlessUrlOld =
       'vless://8e31b30c-2c25-4ff9-8ffb-82b836ecf0d7@79.76.57.148:443'
       '?encryption=none'
@@ -34,6 +35,5 @@ abstract class HardcodedConfig {
       '&type=tcp'
       '#for-lubimaya-lubimaya';
 
-  /// Display name for the fallback profile.
-  static const String profileNameOld = 'for-lubimaya-lubimaya (old)';
+  static const String profileNameOld = 'others';
 }
